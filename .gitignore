@@ -1,0 +1,5 @@
+# Don't commit private keys
+config.yml
+
+# Cache folder
+__pycache__
