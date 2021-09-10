@@ -25,13 +25,5 @@ bot.load_extension('rng')
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
 
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-
-    if message.content.startswith('$halo'):
-        await message.channel.send('Hello!')
-
 # Initialize bot
 bot.run(config['discord_token'], bot=True, reconnect=True)
