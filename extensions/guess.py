@@ -1,9 +1,12 @@
 import discord
 from discord.ext import commands
 import random
+from main import get_prefix
 
 # Name of the command that activates the game.
 COMMAND = 'guess'
+# Prefix registeration
+PREFIX = get_prefix()
 
 class Guess(commands.Cog):
     def __init__(self, bot):
@@ -30,7 +33,7 @@ Guess a number between 1 and 100. Stop guessing to quit.'''.format(ctx.author.id
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        if ctx.author == self.guesser and self.active == True and COMMAND not in ctx.content.split(' ')[0]:
+        if ctx.author == self.guesser and self.active == True and COMMAND not in ctx.content:
             try:
                 guessed_number = int(ctx.content)
             except ValueError:
