@@ -3,3 +3,4 @@ config.yml
 
 # Cache folder
 __pycache__
+.venv
