@@ -1,12 +1,9 @@
 import discord
 from discord.ext import commands
 import random
-from main import get_prefix
 
 # Name of the command that activates the game.
 COMMAND = 'guess'
-# Prefix registeration
-PREFIX = get_prefix()
 
 class Guess(commands.Cog):
     def __init__(self, bot):
