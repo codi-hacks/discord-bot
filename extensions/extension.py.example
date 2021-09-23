@@ -28,7 +28,7 @@ class example(commands.Cog):
 
         # If a message contains 'watermelon', send a message
         if "watermelon" in ctx.content:
-            await ctx.channel.send("I heard {} mention watermelons!".format(ctx.author.name))
+            await ctx.channel.send(":watermelon: I heard {} mention watermelons! :watermelon:".format(ctx.author.name))
 
 def setup(bot):
     bot.add_cog(example(bot))
