@@ -3,3 +3,6 @@ config.yml
 
 # Cache folder
 __pycache__
+
+# Log files
+*.log

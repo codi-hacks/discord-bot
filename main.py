@@ -9,8 +9,9 @@ with open('config.yml', 'r') as file:
 def get_prefix():
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
 
-    # Prefixes may also contain spaces
-    prefixes = ['.']
+    prefixes = config['command_prefixes']
+    if not isinstance(prefixes, list):
+        raise ValueError('Config file does not prefix "command_prefixes" list. See config.yml.example.')
 
     return commands.when_mentioned_or(*prefixes)
 

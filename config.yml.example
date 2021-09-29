@@ -1,1 +1,4 @@
 discord_token: YOUR_TOKEN_HERE
+# Prefixes may also contain spaces
+command_prefixes:
+  - .
