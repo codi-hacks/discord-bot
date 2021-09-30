@@ -2,3 +2,11 @@ discord_token: YOUR_TOKEN_HERE
 # Prefixes may also contain spaces
 command_prefixes:
   - .
+# Channels the bot can talk in. The markov command
+# still works in any channel regardless.
+markov.channels:
+  - robots
+# Chance of bot butting into a conversation. 0.55 = 0.55% chance of speaking
+markov.probability: 0.55
+# Set to false to disable logging and learning new text
+markov.learn: true

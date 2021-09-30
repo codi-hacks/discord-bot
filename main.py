@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-import yaml
 import os
+import yaml
 
 with open('config.yml', 'r') as file:
   config = yaml.safe_load(file)

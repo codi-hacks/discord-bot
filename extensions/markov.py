@@ -4,7 +4,13 @@ import markovify
 # https://www.nltk.org/api/nltk.html
 import nltk
 import os
+import random
 import re
+import yaml
+
+config_file = os.path.join(os.path.dirname(__file__), '..', 'config.yml')
+with open(config_file, 'r') as file:
+  config = yaml.safe_load(file)
 
 class Markov(commands.Cog):
     def __init__(self, bot):
@@ -20,15 +26,17 @@ class Markov(commands.Cog):
         # weight has a bigger influence on markov chains.
         weights = []
 
-        # Create a chat log corpus if one doesn't exist
-        if not os.path.exists(self.log_file):
-            with open(self.log_file, 'w'): pass
+        # Check if we should be logging and learning new phrases
+        if config['markov.learn']:
+            # Create a chat log corpus if one doesn't exist
+            self.touch_log_file()
+            # Load in the log file as a corpus
+            with open(self.log_file) as f:
+                models.append(markovify.NewlineText(f.read()))
+                # Log file has more influence than the static corpus files
+                weights.append(2.0)
 
         # Import all *.corpus files into the model
-        with open(self.log_file) as f:
-            models.append(markovify.NewlineText(f.read()))
-            # Log file has more influence than the static corpus files
-            weights.append(2.0)
         for i in os.listdir(corpus_dir):
             if i.endswith('.corpus') and os.path.isfile(os.path.join(corpus_dir, i)):
                 print('[markov.info] Loading corpus "{}"'.format(os.path.join(corpus_dir, i)))
@@ -38,14 +46,67 @@ class Markov(commands.Cog):
 
         self.model = markovify.combine(models)
 
+    @commands.command()
+    async def markov(self, ctx):
+        """Chat with you"""
+        # Remove command prefix from string
+        text = ' '.join(ctx.message.clean_content.strip().split(' ')[1:])
+        seed_text = self.extract_seed_text(text)
+        if len(seed_text) >= 3:
+            await ctx.channel.send(self.model.make_sentence_with_start(seed_text, False))
+        else:
+            await ctx.channel.send(self.model.make_sentence())
+
+    @commands.Cog.listener()
+    async def on_message(self, msg):
+        # Ignore own messages
+        if msg.author == self.bot.user:
+            return
+
+        text = msg.clean_content.strip()
+        if self.contains_garbage(text):
+            return
+
+        sentences = nltk.tokenize.sent_tokenize(text)
+        if len(sentences) < 1:
+            return
+
+        self.append_to_log_file(sentences)
+        # Let's consider sparking up a conversation if this is
+        # a channel in which we're allowed to talk unprompted.
+        if not msg.channel.name in config['markov.channels']:
+            return
+        # Check probability to see if we should respond
+        probability = config['markov.probability']
+        if not isinstance(probability, int) and not isinstance(probability, float):
+            print('[markov.error] Invalid value given in config file for "markov.probability"')
+            return
+        if probability * 100 <= random.randint(0, 10000):
+            return
+
+        # Generate message based on a portion of the user's sent
+        if len(sentences[0]) >= 3:
+            seed_text = self.extract_seed_text(sentences[0])
+            print('[markov.debug] Text trigger - "{}"'.format(seed_text))
+            await msg.channel.send(self.model.make_sentence_with_start(seed_text, False))
+
     # Pass an array of sentences to append to the end of the log corpus
     def append_to_log_file(self, sentences):
-        if not os.path.exists(self.log_file):
-            with open(self.log_file, 'w'): pass
-        with open(self.log_file, 'a') as f:
-            for sentence in sentences:
-                print('[markov.debug] Logging "{}"'.format(sentence))
-                f.write(sentence + '\n')
+        self.touch_log_file()
+        if config['markov.learn']:
+            with open(self.log_file, 'a') as f:
+                for sentence in sentences:
+                    print('[markov.debug] Logging "{}"'.format(sentence))
+                    f.write(sentence + '\n')
+
+    # Create a chat log corpus if one doesn't exist
+    def touch_log_file(self):
+        if config['markov.learn']:
+            if not os.path.exists(self.log_file):
+                print('[markov.info] Creating markov.log')
+                with open(self.log_file, 'w') as f:
+                    # Some initial seed data is needed for markovify to read the corpus
+                    f.write('Hello World!\nGoodbye cruel world!\n')
 
     # Return True if any non-language text is found in the
     # string that could lower the quality of markov chain models
@@ -66,22 +127,15 @@ class Markov(commands.Cog):
                 return True
         return False
 
-    @commands.command()
-    async def markov(self, ctx):
-        """Chat with you"""
-        #print('.markov clean_content: "{}"'.format(ctx.message.clean_content))
-        await ctx.channel.send(self.model.make_sentence())
+    # Markovify only accepts 2 words as a seed for
+    # a markov chain. Use last 2 words as seed text.
+    def extract_seed_text(self, text):
+        words = []
+        for word in text.split(' ')[-2:]:
+            if len(word) > 1:
+                words.append(word)
+        return re.sub('(\.|\?|!)*$', '', ' '.join(words))
 
-    @commands.Cog.listener()
-    async def on_message(self, ctx):
-        # Ignore own messages
-        if ctx.author == self.bot.user:
-            return
-        text = ctx.clean_content
-        if self.contains_garbage(text):
-            return
-        sentences = nltk.tokenize.sent_tokenize(text)
-        self.append_to_log_file(sentences)
 
 def setup(bot):
     # Update natural language processor at runtime for some reason :/
