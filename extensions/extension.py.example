@@ -18,17 +18,17 @@ class example(commands.Cog):
         await ctx.send("This is an example.")
 
     @commands.Cog.listener()
-    async def on_message(self, ctx):
+    async def on_message(self, message):
         """Listens for a message.
         This will run every single time the bot sees a new message."""
         
         # Keep the bot from responding to itself.
-        if ctx.author == self.bot.user:
+        if message.author == self.bot.user:
             return
 
         # If a message contains 'watermelon', send a message
-        if "watermelon" in ctx.content:
-            await ctx.channel.send(":watermelon: I heard {} mention watermelons! :watermelon:".format(ctx.author.name))
+        if "watermelon" in message.content:
+            await message.channel.send(":watermelon: I heard {} mention watermelons! :watermelon:".format(message.author.name))
 
 def setup(bot):
     bot.add_cog(example(bot))
