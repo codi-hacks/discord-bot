@@ -6,16 +6,16 @@ import os
 with open('config.yml', 'r') as file:
   config = yaml.safe_load(file)
 
-def get_prefix(bot, message):
+def get_prefix():
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
 
     # Prefixes may also contain spaces
     prefixes = ['.']
 
-    return commands.when_mentioned_or(*prefixes)(bot, message)
+    return commands.when_mentioned_or(*prefixes)
 
 #bot = discord.Client()
-bot = commands.Bot(command_prefix='.', description='CodiHacks bot')
+bot = commands.Bot(command_prefix=get_prefix(), description='CodiHacks bot')
 
 # Load cogs by the filenames
 for i in os.listdir('extensions'):

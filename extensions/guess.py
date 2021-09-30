@@ -2,6 +2,9 @@ import discord
 from discord.ext import commands
 import random
 
+# Name of the command that activates the game.
+COMMAND = 'guess'
+
 class Guess(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -17,16 +20,17 @@ class Guess(commands.Cog):
     def generate_number(self):
         return random.randint(0, 100)
 
-    @commands.command(name='guess')
+    @commands.command(name=COMMAND)
     async def guess(self, ctx):
         """Guess the number"""
         self.guesser = ctx.author
         self.active = True
-        await ctx.send('Starting guessing game with {}'.format(ctx.author))
+        await ctx.send('''Starting guessing game with <@!{}>
+Guess a number between 1 and 100. Stop guessing to quit.'''.format(ctx.author.id))
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        if ctx.author == self.guesser and self.active == True and ctx.content.split(' ')[0] != '.guess':
+        if ctx.author == self.guesser and self.active == True and COMMAND not in ctx.content:
             try:
                 guessed_number = int(ctx.content)
             except ValueError:
