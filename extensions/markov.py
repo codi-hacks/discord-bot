@@ -53,7 +53,10 @@ class Markov(commands.Cog):
         text = ' '.join(ctx.message.clean_content.strip().split(' ')[1:])
         seed_text = self.extract_seed_text(text)
         if len(seed_text) >= 3:
-            await ctx.channel.send(self.model.make_sentence_with_start(seed_text, False))
+            try:
+                await ctx.channel.send(self.model.make_sentence_with_start(seed_text, False))
+            except Exception:
+                await ctx.channel.send(self.model.make_sentence())
         else:
             await ctx.channel.send(self.model.make_sentence())
 
@@ -88,7 +91,10 @@ class Markov(commands.Cog):
         if len(sentences[0]) >= 3:
             seed_text = self.extract_seed_text(sentences[0])
             print('[markov.debug] Text trigger - "{}"'.format(seed_text))
-            await msg.channel.send(self.model.make_sentence_with_start(seed_text, False))
+            try:
+                await msg.channel.send(self.model.make_sentence_with_start(seed_text, False))
+            except Exception:
+                return
 
     # Pass an array of sentences to append to the end of the log corpus
     def append_to_log_file(self, sentences):
@@ -96,8 +102,10 @@ class Markov(commands.Cog):
         if config['markov.learn']:
             with open(self.log_file, 'a') as f:
                 for sentence in sentences:
-                    print('[markov.debug] Logging "{}"'.format(sentence))
-                    f.write(sentence + '\n')
+                    # Ignore one-word sentences
+                    if len(sentence.split(' ')) > 1:
+                        print('[markov.debug] Logging "{}"'.format(sentence))
+                        f.write(sentence + '\n')
 
     # Create a chat log corpus if one doesn't exist
     def touch_log_file(self):
