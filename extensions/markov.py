@@ -77,8 +77,11 @@ class Markov(commands.Cog):
         self.append_to_log_file(sentences)
         # Let's consider sparking up a conversation if this is a channel in which
         # we're allowed to talk unprompted. Private channels bypass this check.
-        if msg.channel.type == 'text' and not msg.channel.name in config['markov.channels']:
+        if msg.channel.type == 'text' and not (msg.channel.name in config['markov.channels']):
             return
+        elif msg.channel.type != 'private':
+            return
+
         # Check probability to see if we should respond
         probability = config['markov.probability']
         if not isinstance(probability, int) and not isinstance(probability, float):
