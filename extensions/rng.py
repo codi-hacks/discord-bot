@@ -53,5 +53,14 @@ class RNG(commands.Cog):
 
         await ctx.send(random.choice(choices))
 
+    @commands.command(description='Coin Flip', aliases=['coin', 'flip', 'toss'])
+    async def coinflip(self, ctx):
+        flip = random.randint(0, 1)
+        if (flip == 0):
+            await ctx.send("Heads")
+        else:
+            await ctx.send("Tails")
+
+
 def setup(bot):
     bot.add_cog(RNG(bot))
