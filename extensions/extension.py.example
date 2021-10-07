@@ -1,0 +1,34 @@
+"""This file demos a few features of discord.py
+    It also provides a quick framework to make starting
+    a new extension quickly."""
+
+from discord.ext import commands
+
+# Name of the command that activates the game.
+# Currently, the bot will respond to the message '.test'
+COMMAND = 'test'
+
+class example(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(name=COMMAND)
+    async def example_command(self, ctx):
+        """Does something."""
+        await ctx.send("This is an example.")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        """Listens for a message.
+        This will run every single time the bot sees a new message."""
+        
+        # Keep the bot from responding to itself.
+        if message.author == self.bot.user:
+            return
+
+        # If a message contains 'watermelon', send a message
+        if "watermelon" in message.content:
+            await message.channel.send(":watermelon: I heard {} mention watermelons! :watermelon:".format(message.author.name))
+
+def setup(bot):
+    bot.add_cog(example(bot))
